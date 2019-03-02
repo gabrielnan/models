@@ -21,7 +21,7 @@ from deeplab.core import nas_network
 from deeplab.core import resnet_v1_beta
 from deeplab.core import xception
 from tensorflow.contrib.slim.nets import resnet_utils
-from nets.mobilenet import mobilenet_v2
+# from nets.mobilenet import mobilenet_v2
 
 
 slim = tf.contrib.slim
@@ -90,7 +90,7 @@ networks_map = {
 
 # A map from network name to network arg scope.
 arg_scopes_map = {
-    'mobilenet_v2': mobilenet_v2.training_scope,
+    # 'mobilenet_v2': mobilenet_v2.training_scope,
     'resnet_v1_50': resnet_utils.resnet_arg_scope,
     'resnet_v1_50_beta': resnet_utils.resnet_arg_scope,
     'resnet_v1_101': resnet_utils.resnet_arg_scope,
