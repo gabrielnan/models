@@ -78,8 +78,8 @@ _CITYSCAPES_INFORMATION = DatasetDescriptor(
 
 _CTSCANS_INFORMATION = DatasetDescriptor(
     splits_to_sizes={
-        'train': None,
-        'val': None,
+        'train256': 31662,
+        'test256': 10818,
     },
     num_classes=2,
     ignore_label=None,

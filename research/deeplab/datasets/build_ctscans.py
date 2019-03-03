@@ -3,7 +3,8 @@ import os
 import tensorflow as tf
 import glob
 from PIL import Image
-from tqdm import trange, tqdm
+import pdb as bug
+from tqdm import tqdm, trange
 import sys
 import build_data
 import math
@@ -22,6 +23,7 @@ def remove_color_map(dir, output_dir):
     annotations = glob.glob(os.path.join(dir, '*.' + SEG_FORMAT))
     for annotation in tqdm(annotations):
         raw_annotation = np.array(Image.open(annotation))
+        raw_annotation = np.min(raw_annotation, axis=-1)
         filename = os.path.join(output_dir, *(annotation.split('/')[-2:]))
         headname = os.path.split(filename)[0]
         if not tf.gfile.IsDirectory(headname):
@@ -49,7 +51,7 @@ def convert_dataset(dir, output_dir, num_shards=7, seed=123):
     # Shuffle data
     z = list(zip(img_filenames, seg_filenames))
     np.random.shuffle(z)
-    img_filenames, seg_filenames = zip(*z)
+    img_filenames[:], seg_filenames[:] = zip(*z)
 
     for shard in trange(num_shards):
         output_filename = os.path.join(
@@ -72,8 +74,7 @@ def main(unused_argv):
     for dir in glob.glob('ctscans/*'):
         masks_dir = os.path.join(dir, 'masks_pngs', '*')
         train_output_dir = os.path.join(dir, SEG_DIRNAME)
-        if 'test' not in dir:
-            remove_color_map(masks_dir, train_output_dir)
+        remove_color_map(masks_dir, train_output_dir)
 
         convert_dataset(dir, 'ctscans/tfrecord')
 
