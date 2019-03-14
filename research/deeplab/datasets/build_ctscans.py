@@ -11,26 +11,25 @@ import math
 
 
 FLAGS = tf.app.flags.FLAGS
-SEG_FORMAT = 'png'
-SEG_DIRNAME = 'seg_pngs'
+FORMAT = 'png'
 IMG_DIRNAME = 'images_pngs'
+MASK_DIRNAME = 'masks_pngs'
 
 
-def remove_color_map(dir, output_dir):
-    if not tf.gfile.IsDirectory(output_dir):
-        tf.gfile.MakeDirs(output_dir)
+def remove_color_map(input_dir):
+    #if not tf.gfile.IsDirectory(output_dir):
+    #    tf.gfile.MakeDirs(output_dir)
 
-    annotations = glob.glob(os.path.join(dir, '*.' + SEG_FORMAT))
-    for annotation in tqdm(annotations):
-        raw_annotation = np.array(Image.open(annotation))
-        raw_annotation = np.min(raw_annotation, axis=-1)
-        filename = os.path.join(output_dir, *(annotation.split('/')[-2:]))
-        headname = os.path.split(filename)[0]
-        if not tf.gfile.IsDirectory(headname):
-            tf.gfile.MakeDirs(headname)
-        pil_image = Image.fromarray(raw_annotation.astype(dtype=np.uint8))
+    filenames = glob.glob(os.path.join(input_dir, '*/*/*.' + FORMAT))
+    for filename in tqdm(filenames):
+        grey_img = Image.open(filename).convert('L')
+        #filename = os.path.join(output_dir, *(annotation.split('/')[-2:]))
+        #headname = os.path.split(filename)[0]
+        #if not tf.gfile.IsDirectory(headname):
+        #    tf.gfile.MakeDirs(headname)
+        #pil_image = Image.fromarray(raw_annotation.astype(dtype=np.uint8))
         with tf.gfile.Open(filename, mode='w') as f:
-            pil_image.save(f, 'PNG')
+            grey_img.save(f, 'PNG')
 
 
 def convert_dataset(dir, output_dir, num_shards=7, seed=123):
@@ -44,7 +43,7 @@ def convert_dataset(dir, output_dir, num_shards=7, seed=123):
 
     # Getting filenames
     img_filenames = glob.glob(os.path.join(dir, IMG_DIRNAME, '*', '*.png'))
-    seg_filenames = glob.glob(os.path.join(dir, SEG_DIRNAME, '*', '*.png'))
+    seg_filenames = glob.glob(os.path.join(dir, MASK_DIRNAME, '*', '*.png'))
     num_images = len(img_filenames)
     num_per_shard = int(math.ceil(num_images / float(num_shards)))
 
@@ -71,12 +70,14 @@ def convert_dataset(dir, output_dir, num_shards=7, seed=123):
 
 
 def main(unused_argv):
-    for dir in glob.glob('ctscans/*'):
-        masks_dir = os.path.join(dir, 'masks_pngs', '*')
-        train_output_dir = os.path.join(dir, SEG_DIRNAME)
-        remove_color_map(masks_dir, train_output_dir)
+    for input_dir in glob.glob('ctscans/*'):
+        # masks_dir = os.path.join(dir, MASK_DIRNAME, '*')
+        # train_output_dir = os.path.join(dir, SEG_DIRNAME)
+        print('removing colormap for images in {}'.format(input_dir))
+        remove_color_map(input_dir)
 
-        convert_dataset(dir, 'ctscans/tfrecord')
+        print('converting images to tfrecord in {}'.format(input_dir))
+        convert_dataset(input_dir, 'ctscans/tfrecord')
 
 
 if __name__ == '__main__':

@@ -82,7 +82,7 @@ _CTSCANS_INFORMATION = DatasetDescriptor(
         'test256': 10818,
     },
     num_classes=2,
-    ignore_label=None,
+    ignore_label=7,
 )
 
 _PASCAL_VOC_SEG_INFORMATION = DatasetDescriptor(
